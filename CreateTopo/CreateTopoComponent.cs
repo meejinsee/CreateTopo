@@ -34,7 +34,7 @@ namespace CreateTopo
             if (op.ShowDialog() != DialogResult.OK) return;
             CRS = Option.m_CRS;
             unit = Option.m_Unit;
-
+            // 앗
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Shapefiles|*.shp";
             ofd.Multiselect = true;
