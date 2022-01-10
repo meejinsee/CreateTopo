@@ -78,6 +78,7 @@
     <Compile Include="Option.Designer.cs">
       <DependentUpon>Option.cs</DependentUpon>
     </Compile>
+    <Compile Include="ParsingData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
