@@ -118,14 +118,13 @@ namespace CreateTopo
                 foreach (string path in filepaths)
                 {
                     var sf = Shapefile.OpenFile(path, DataManager.DefaultDataManager.ProgressHandler);
-                    //Reproject(ProjectionInfo targetProjection);
 
-                    string n = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs";
-                    ProjectionInfo pf = ProjectionInfo.FromProj4String(n);
-                    if(sf.CanReproject == true)
-                    {
-                        sf.Reproject(pf);
-                    }
+                    //string n = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs";
+                    //ProjectionInfo pf = ProjectionInfo.FromProj4String(n);
+                    //if(sf.CanReproject == true)
+                    //{
+                    //    sf.Reproject(pf);
+                    //}
 
                     string srs_re = "";
                     if (CRS == "")
