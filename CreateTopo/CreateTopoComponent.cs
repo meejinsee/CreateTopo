@@ -31,6 +31,7 @@ namespace CreateTopo
         public void FunctionToRunClick()
         {
             m_filepaths.Clear();
+            CRS = "";
 
             Option op = new Option();
             if (op.ShowDialog() != DialogResult.OK) return;
@@ -70,7 +71,6 @@ namespace CreateTopo
         {
             if (m_filepaths.Count == 0) return;
 
-            
             List<Tuple<Shapefile, List<Point3d>, List<Polyline>, string, List<string>>> data = GetdataFromShape(m_filepaths, unit, CRS);
 
             DataTree<Shapefile> shapeList = new DataTree<Shapefile>();
@@ -118,6 +118,15 @@ namespace CreateTopo
                 foreach (string path in filepaths)
                 {
                     var sf = Shapefile.OpenFile(path, DataManager.DefaultDataManager.ProgressHandler);
+                    //Reproject(ProjectionInfo targetProjection);
+
+                    string n = "+proj=tmerc +lat_0=38 +lon_0=127 +k=1 +x_0=200000 +y_0=500000 +ellps=GRS80 +units=m +no_defs";
+                    ProjectionInfo pf = ProjectionInfo.FromProj4String(n);
+                    if(sf.CanReproject == true)
+                    {
+                        sf.Reproject(pf);
+                    }
+
                     string srs_re = "";
                     if (CRS == "")
                     {
@@ -174,8 +183,6 @@ namespace CreateTopo
                             ploys.Add(pp);
                         }
                     }
-
-                    Point3d[] removeDuplicate_re = Point3d.CullDuplicates(pts, 0.001);
 
                     retundata.Add(new Tuple<Shapefile, List<Point3d>, List<Polyline>, string, List<string>>(sf, pts, ploys, srs_re, features));
                 }
