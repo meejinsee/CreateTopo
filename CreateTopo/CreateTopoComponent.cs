@@ -19,8 +19,24 @@ namespace CreateTopo
         public static string CRS = "";
         public static bool unit = true;
         public static List<string> m_filepaths = new List<string>();
+
         public CreateTopoComponent(): base("CreateTopo", "Shape", "FlorBIM", "FlorBIM", "CreateTopo")
         {
+        }
+
+        //protected override void BeforeSolveInstance()
+        //{
+        //    CRS = "";
+        //    unit = true;
+        //    m_filepaths.Clear();
+
+        //    base.BeforeSolveInstance();
+        //}
+
+        protected override void AfterSolveInstance()
+        {
+            base.AfterSolveInstance();
+            m_filepaths.Clear();
         }
 
         public override void CreateAttributes()
@@ -79,20 +95,29 @@ namespace CreateTopo
             DataTree<string> SRC = new DataTree<string>();
             DataTree<string> features = new DataTree<string>();
 
-            for (int i = 0; i < data.Count; i++)
+            try
             {
-                shapeList.Add(data[i].Item1, new GH_Path(i));
-                pts.AddRange(data[i].Item2, new GH_Path(i));
-                poylist.AddRange(data[i].Item3, new GH_Path(i));
-                SRC.Add(data[i].Item4, new GH_Path(i));
-                features.AddRange(data[i].Item5, new GH_Path(i));
-            }
+                for (int i = 0; i < data.Count; i++)
+                {
+                    shapeList.Add(data[i].Item1, new GH_Path(i));
+                    pts.AddRange(data[i].Item2, new GH_Path(i));
+                    poylist.AddRange(data[i].Item3, new GH_Path(i));
+                    SRC.Add(data[i].Item4, new GH_Path(i));
+                    features.AddRange(data[i].Item5, new GH_Path(i));
+                }
 
-            DA.SetDataTree(0, shapeList);
-            DA.SetDataTree(1, pts);
-            DA.SetDataTree(2, poylist);
-            DA.SetDataTree(3, SRC);
-            DA.SetDataTree(4, features);
+                DA.SetDataTree(0, shapeList);
+                DA.SetDataTree(1, pts);
+                DA.SetDataTree(2, poylist);
+                DA.SetDataTree(3, SRC);
+                DA.SetDataTree(4, features);
+
+                //DA.IncrementIteration();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         protected override System.Drawing.Bitmap Icon
@@ -151,36 +176,50 @@ namespace CreateTopo
                     foreach (var item in Pdata)
                     {
                         IList<Coordinate> cd = item.Coordinates;
+                        var typeF = item.FeatureType;
+
                         List<Point3d> pprs = new List<Point3d>();
-                        foreach (Coordinate p in cd)
-                        {
-                            if(unit == true)
-                            {
-                                pts.Add(new Point3d(p.X, p.Y, 0));
-                                pprs.Add(new Point3d(p.X, p.Y, 0));
-                            }
-                            else
-                            {
-                                pts.Add(new Point3d(p.X*1000, p.Y*1000, 0));
-                                pprs.Add(new Point3d(p.X*1000, p.Y*1000, 0));
-                            }
-                        }
-                        Point3d[] removeDuplicate = Point3d.CullDuplicates(pprs, 0.001);
 
-                        if (sf.FeatureType == FeatureType.Line)
+                        if (typeF == FeatureType.Polygon)
                         {
-                            Polyline pp = new Polyline(removeDuplicate);
+                            var geometry = new Polygon(new LinearRing(cd));
+                            IList<Coordinate> cdc = geometry.Coordinates;
+
+                            foreach (Coordinate p in cdc)
+                            {
+                                if (unit == true)
+                                {
+                                    pts.Add(new Point3d(p.X, p.Y, 0));
+                                    pprs.Add(new Point3d(p.X, p.Y, 0));
+                                }
+                                else
+                                {
+                                    pts.Add(new Point3d(p.X * 1000, p.Y * 1000, 0));
+                                    pprs.Add(new Point3d(p.X * 1000, p.Y * 1000, 0));
+                                }
+                            }
+
+                            Polyline pp = new Polyline(pprs);
                             ploys.Add(pp);
                         }
 
-                        else if (sf.FeatureType == FeatureType.Polygon)
-                        {
-                            List<Point3d> ppts = new List<Point3d>();
-                            ppts.AddRange(removeDuplicate);
-                            ppts.Add(removeDuplicate[0]);
-                            Polyline pp = new Polyline(ppts);
-                            ploys.Add(pp);
-                        }
+
+                        //Point3d[] removeDuplicate = Point3d.CullDuplicates(pprs, 0.001);
+
+                        //if (sf.FeatureType == FeatureType.Line)
+                        //{
+                        //    Polyline pp = new Polyline(removeDuplicate);
+                        //    ploys.Add(pp);
+                        //}
+
+                        //else if (sf.FeatureType == FeatureType.Polygon)
+                        //{
+                        //    //List<Point3d> ppts = new List<Point3d>();
+                        //    //ppts.AddRange(removeDuplicate);
+                        //    //ppts.Add(removeDuplicate[0]);
+                        //    Polyline pp = new Polyline(pprs);
+                        //    ploys.Add(pp);
+                        //}
                     }
 
                     retundata.Add(new Tuple<Shapefile, List<Point3d>, List<Polyline>, string, List<string>>(sf, pts, ploys, srs_re, features));
