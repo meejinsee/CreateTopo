@@ -203,7 +203,6 @@ namespace CreateTopo
                             ploys.Add(pp);
                         }
 
-
                         //Point3d[] removeDuplicate = Point3d.CullDuplicates(pprs, 0.001);
 
                         //if (sf.FeatureType == FeatureType.Line)
